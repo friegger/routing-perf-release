@@ -3,13 +3,14 @@ name: performance_tests
 
 templates:
   run.erb: bin/run
+  run_perf_test.erb: bin/run_perf_test
 
 packages:
   - boom
 
 properties:
-  performance_tests.address:
-    description: The address to run performance tests against
+  performance_tests.addresses:
+    description: The addresses to run performance tests against
   performance_tests.host:
     description: The host to specify in the 'Host:' header
   performance_tests.port:
