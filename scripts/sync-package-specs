@@ -3,8 +3,8 @@
 set -e
 
 # ensure gosub is installed (this will recompile it only if necessary)
-go get github.com/vito/gosub
-go install github.com/vito/gosub
+#go get github.com/vito/gosub
+#go install github.com/vito/gosub
 
 function sync_package() {
   bosh_pkg=${1}
@@ -21,6 +21,9 @@ function sync_package() {
 
       for package in $(gosub list "$@"); do
         repo=$(echo ${2} | cut -f1-3 -d/)
+        if [[ "${repo}" == *"gorouter"* ]] || [[ "${repo}" == *"route-registrar"* ]]; then
+          package="routing-perf-release/src/${package}"
+        fi
         echo ${package} | sed -e 's/\(.*\)/  - \1\/*.go # gosub/g'
       done
     } > spec.new
@@ -29,9 +32,7 @@ function sync_package() {
   )
 }
 
-sync_package gostatic             -app gostatic/... &
-sync_package http_route_populator -app http_route_populator/... &
-sync_package boom                  -app github.com/rakyll/boom/... &
+sync_package vulcandproxy   -app github.com/vulcandproxy/... &
 
 wait
 

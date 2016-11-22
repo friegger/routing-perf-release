@@ -1,0 +1,5 @@
+check process vulcandproxy
+  with pidfile /var/vcap/sys/run/vulcandproxy/pid
+  start program "/var/vcap/jobs/vulcandproxy/bin/ctl start"
+  stop program "/var/vcap/jobs/vulcandproxy/bin/ctl stop"
+  group vcap

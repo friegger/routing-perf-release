@@ -7,3 +7,9 @@
 [submodule "src/github.com/rakyll/boom"]
 	path = src/github.com/rakyll/boom
 	url = https://github.com/rakyll/boom
+[submodule "src/github.com/vulcand/oxy"]
+	path = src/github.com/vulcand/oxy
+	url = https://github.com/vulcand/oxy
+[submodule "src/github.com/Sirupsen/logrus"]
+	path = src/github.com/Sirupsen/logrus
+	url = https://github.com/Sirupsen/logrus

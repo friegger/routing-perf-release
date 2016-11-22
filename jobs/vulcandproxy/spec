@@ -1,0 +1,8 @@
+---
+name:vulcandproxy
+templates:
+  ctl.erb: bin/ctl
+
+packages:
+  - vulcandproxy
+
