@@ -1,0 +1,8 @@
+---
+name: httputilproxy
+templates:
+  ctl.erb: bin/ctl
+
+packages:
+  - httputilproxy
+

@@ -3,7 +3,7 @@ name: vulcandproxy
 dependencies:
 - golang
 files:
-  - github.com/Sirupsen/logrus/*.go # gosub
   - github.com/vulcand/oxy/forward/*.go # gosub
-  - github.com/vulcandproxy/*.go # gosub
   - github.com/vulcand/oxy/utils/*.go # gosub
+  - github.com/Sirupsen/logrus/*.go # gosub
+  - github.com/vulcandproxy/*.go # gosub

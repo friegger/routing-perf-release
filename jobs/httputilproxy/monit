@@ -1,0 +1,5 @@
+check process httputilproxy
+  with pidfile /var/vcap/sys/run/httputilproxy/pid
+  start program "/var/vcap/jobs/httputilproxy/bin/ctl start"
+  stop program "/var/vcap/jobs/httputilproxy/bin/ctl stop"
+  group vcap

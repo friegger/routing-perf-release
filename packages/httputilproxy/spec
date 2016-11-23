@@ -1,0 +1,6 @@
+---
+name: httputilproxy
+dependencies:
+- golang
+files:
+  - github.com/httputilproxy/*.go # gosub
