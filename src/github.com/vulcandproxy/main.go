@@ -5,10 +5,18 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/vulcand/oxy/forward"
 )
 
+type nilLogger struct{}
+
+func (n nilLogger) Write(p []byte) (int, error) {
+	return 0, nil
+}
+
 func main() {
+	logrus.SetOutput(nilLogger{})
 	fwd, _ := forward.New()
 
 	redirect := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -17,14 +25,6 @@ func main() {
 		req.URL.Host = "10.0.1.2:8080"
 		fwd.ServeHTTP(w, req)
 	})
-
-	//	reverseproxy := &httputil.ReverseProxy{
-	//		Transport: transport,
-	//		Director: func(request *http.Request) {
-	//			request.URL.Scheme = "http"
-	//			request.URL.Host = "10.0.1.2:8080"
-	//		},
-	//	}
 
 	server := &http.Server{Handler: redirect, Addr: ":80"}
 
