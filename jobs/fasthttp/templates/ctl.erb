@@ -1,0 +1,30 @@
+#!/bin/bash
+
+RUN_DIR=/var/vcap/sys/run/fasthttp
+LOG_DIR=/var/vcap/sys/log/fasthttp
+PIDFILE=${RUN_DIR}/pid
+
+case $1 in
+
+  start)
+    mkdir -p $RUN_DIR $LOG_DIR
+    chown -R vcap:vcap $RUN_DIR $LOG_DIR
+
+    echo $$ > $PIDFILE
+
+    exec /var/vcap/packages/fasthttp/bin/fasthttp \
+      >>  $LOG_DIR/fasthttp.stdout.log \
+      2>> $LOG_DIR/fasthttp.stderr.log
+
+    ;;
+
+  stop)
+    kill -9 `cat $PIDFILE`
+    rm -f $PIDFILE
+
+    ;;
+
+  *)
+    echo "Usage: ctl {start|stop}" ;;
+
+esac

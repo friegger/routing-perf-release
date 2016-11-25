@@ -1,0 +1,5 @@
+check process fasthttp
+  with pidfile /var/vcap/sys/run/fasthttp/pid
+  start program "/var/vcap/jobs/fasthttp/bin/ctl start"
+  stop program "/var/vcap/jobs/fasthttp/bin/ctl stop"
+  group vcap

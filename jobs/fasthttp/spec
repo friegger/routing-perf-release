@@ -1,0 +1,8 @@
+---
+name: fasthttp
+templates:
+  ctl.erb: bin/ctl
+
+packages:
+  - fasthttp
+

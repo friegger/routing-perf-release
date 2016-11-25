@@ -1,0 +1,6 @@
+---
+name: fasthttp
+dependencies:
+- golang
+files:
+  - github.com/fasthttp/*.go # gosub
