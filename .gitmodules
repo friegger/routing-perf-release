@@ -7,3 +7,6 @@
 [submodule "src/github.com/rakyll/boom"]
 	path = src/github.com/rakyll/boom
 	url = https://github.com/rakyll/boom
+[submodule "src/github.com/c9s/goprocinfo"]
+	path = src/github.com/c9s/goprocinfo
+	url = https://github.com/c9s/goprocinfo
