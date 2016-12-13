@@ -4,4 +4,5 @@ dependencies:
   - golang
 files:
   - cpu_monitor/*.go # gosub
-  - github.com/c9s/goprocinfo/linux/*.go # gosub
+  - github.com/shirou/gopsutil/cpu/*.go # gosub
+  - github.com/shirou/gopsutil/internal/common/*.go # gosub

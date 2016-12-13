@@ -1,17 +1,22 @@
 package main
 
 import (
-	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"time"
 
-	"github.com/c9s/goprocinfo/linux"
+	"github.com/shirou/gopsutil/cpu"
 )
 
 func getCPU(w http.ResponseWriter, r *http.Request) {
-	stat, _ := linux.ReadStat("/proc/stat")
-	body, _ := json.Marshal(stat.CPUStatAll)
-	w.Write(body)
+	percent, err := cpu.Percent(1*time.Second, false)
+	if err != nil {
+		log.Fatal("Couldn't get percentage")
+	}
+
+	body := fmt.Sprintf("%#v", percent)
+	w.Write([]byte(body))
 }
 
 func main() {
