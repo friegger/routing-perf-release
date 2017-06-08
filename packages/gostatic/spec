@@ -3,6 +3,7 @@ name: gostatic
 dependencies:
 - golang
 files:
+  - gostatic/certs/*
   - gostatic/vendor/**/*
   - gostatic/*.go # gosub
   - gostatic/vendor/github.com/klauspost/compress/flate/*.go # gosub

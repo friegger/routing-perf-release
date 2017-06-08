@@ -61,6 +61,8 @@ type RouteData struct {
 	Host string   `json:"host"`
 	Port int      `json:"port"`
 	URIs []string `json:"uris"`
+	TLS  bool     `json:"tls"`
+	App  string   `json:"app"`
 }
 
 type Publisher struct {
@@ -93,6 +95,8 @@ func (p *Publisher) Initialize(c ConnectionCreator) error {
 	routeData := RouteData{
 		Host: p.job.BackendHost,
 		Port: p.job.BackendPort,
+		TLS:  true,
+		App:  "potato-guid-app-id",
 	}
 
 	for i := p.job.StartRange; i < p.job.EndRange; i += 1 {

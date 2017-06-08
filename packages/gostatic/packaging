@@ -10,4 +10,6 @@ cp -a . ${BOSH_INSTALL_TARGET}/src
 export GOPATH=${BOSH_INSTALL_TARGET}
 go install gostatic
 
+cp -r ${BOSH_INSTALL_TARGET}/src/gostatic/certs ${BOSH_INSTALL_TARGET}/bin/certs
+
 rm -rf ${BOSH_INSTALL_TARGET}/src ${BOSH_INSTALL_TARGET}/pkg

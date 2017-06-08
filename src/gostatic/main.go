@@ -26,7 +26,7 @@ func main() {
 		log.Fatalf("The PORT environment variable is empty")
 	}
 	data = strings.Repeat("Z", responseSize*1024)
-	log.Fatal(fasthttp.ListenAndServe(":"+os.Getenv("PORT"), index))
+	log.Fatal(fasthttp.ListenAndServeTLS(":"+os.Getenv("PORT"), "/var/vcap/packages/gostatic/bin/certs/server.crt", "/var/vcap/packages/gostatic/bin/certs/server.key", index))
 }
 
 func index(ctx *fasthttp.RequestCtx) {
