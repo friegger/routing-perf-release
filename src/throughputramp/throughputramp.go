@@ -56,7 +56,7 @@ func main() {
 
 	url := flag.Args()[0]
 
-	cpumonitorURL := strings.TrimPrefix(*cpuMonitorURL, "http://")
+	cpumonitorURL := strings.TrimPrefix(*cpuMonitorURL, "https://")
 
 	runBenchmark(url,
 		*proxy,
@@ -168,12 +168,12 @@ func runBenchmark(url,
 func run(url, proxy string, numRequests, concurrentRequests, rateLimit int) ([]byte, error) {
 	fmt.Fprintf(os.Stdout, "Running benchmark with %d requests, %d concurrency, and %d rate limit\n", numRequests, concurrentRequests, rateLimit)
 	args := []string{
-		"-x", proxy,
+		"-host", url,
 		"-n", strconv.Itoa(numRequests),
 		"-c", strconv.Itoa(concurrentRequests),
 		"-q", strconv.Itoa(rateLimit),
 		"-o", "csv",
-		url,
+		proxy,
 	}
 
 	heyData, err := exec.Command("hey", args...).Output()
