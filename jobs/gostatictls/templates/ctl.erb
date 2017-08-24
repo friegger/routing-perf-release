@@ -1,0 +1,35 @@
+#!/bin/bash
+
+RUN_DIR=/var/vcap/sys/run/gostatictls
+LOG_DIR=/var/vcap/sys/log/gostatictls
+PIDFILE=${RUN_DIR}/pid
+
+export PORT=8080
+export APP_CERT="<%= p("gostatictls.app_cert") %>"
+export APP_KEY="<%= p("gostatictls.app_key") %>"
+export RESPONSE_SIZE=<%= p("gostatictls.response_size") %>
+
+case $1 in
+
+  start)
+    mkdir -p $RUN_DIR $LOG_DIR
+    chown -R vcap:vcap $RUN_DIR $LOG_DIR
+
+    echo $$ > $PIDFILE
+
+    exec /var/vcap/packages/gostatictls/bin/gostatictls \
+      >>  $LOG_DIR/gostatictls.stdout.log \
+      2>> $LOG_DIR/gostatictls.stderr.log
+
+    ;;
+
+  stop)
+    kill -9 `cat $PIDFILE`
+    rm -f $PIDFILE
+
+    ;;
+
+  *)
+    echo "Usage: ctl {start|stop}" ;;
+
+esac

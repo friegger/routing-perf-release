@@ -1,0 +1,6 @@
+---
+applications:
+ - name: statictls
+   env:
+     GOVERSION: go1.8
+     GOPACKAGENAME: gostatictls

@@ -20,6 +20,10 @@ properties:
   http_route_populator.app_name:
     description: The name of the app for the route to register.
     example: sample
+  http_route_populator.backend_tls_port:
+    description: The port for TLS connections.
+  http_route_populator.backend_instance_id:
+    description: The instance_id for TLS connections.
   http_route_populator.num_routes:
     description: |
       Number of routes to populate the routing table with.

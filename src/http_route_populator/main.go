@@ -26,10 +26,22 @@ var backendHost = flag.String(
 	"Host for the destination of the route.",
 )
 
+var backendTLSPort = flag.Int(
+	"backendTLSPort",
+	0,
+	"TLS Port for the destination of the route.",
+)
+
 var backendPort = flag.Int(
 	"backendPort",
 	0,
 	"Port for the destination of the route.",
+)
+
+var backendInstanceId = flag.String(
+	"backendInstanceId",
+	"",
+	"InstanceId for the destination of the route.",
 )
 
 var appDomain = flag.String(
@@ -83,8 +95,8 @@ func checkRequiredFields() {
 		checkFailed = true
 	}
 
-	if *backendPort <= 0 {
-		fmt.Fprintf(os.Stderr, "-backendPort must be provided\n")
+	if *backendPort <= 0 && *backendTLSPort <= 0 {
+		fmt.Fprintf(os.Stderr, "-backendPort or -backendTLSPort must be provided\n")
 		checkFailed = true
 	}
 
@@ -126,8 +138,10 @@ func startPopulatingRoutes() {
 	job := publisher.Job{
 		PublishingEndpoint: *natsEndpoint,
 
-		BackendHost: *backendHost,
-		BackendPort: *backendPort,
+		BackendHost:       *backendHost,
+		BackendPort:       *backendPort,
+		BackendTLSPort:    *backendTLSPort,
+		BackendInstanceId: *backendInstanceId,
 
 		AppDomain: *appDomain,
 		AppName:   *appName,

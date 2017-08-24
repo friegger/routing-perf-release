@@ -18,8 +18,10 @@ type PublishingConnection interface {
 type Job struct {
 	PublishingEndpoint string
 
-	BackendHost string
-	BackendPort int
+	BackendHost       string
+	BackendTLSPort    int
+	BackendPort       int
+	BackendInstanceId string
 
 	AppDomain  string
 	AppName    string
@@ -39,8 +41,8 @@ func (j Job) validate() error {
 		return validationError(`Missing "BackendHost"`)
 	}
 
-	if j.BackendPort == 0 {
-		return validationError(`Missing "BackendPort"`)
+	if j.BackendPort == 0 && j.BackendTLSPort == 0 {
+		return validationError(`Missing "BackendPort" or "BackendTLSPort"`)
 	}
 
 	if j.AppDomain == "" {
@@ -58,9 +60,11 @@ func (j Job) validate() error {
 }
 
 type RouteData struct {
-	Host string   `json:"host"`
-	Port int      `json:"port"`
-	URIs []string `json:"uris"`
+	Host       string   `json:"host"`
+	Port       int      `json:"port"`
+	TLSPort    int      `json:"tls_port"`
+	URIs       []string `json:"uris"`
+	InstanceId string   `json:"private_instance_id"`
 }
 
 type Publisher struct {
@@ -91,8 +95,10 @@ func (p *Publisher) Initialize(c ConnectionCreator) error {
 	}
 
 	routeData := RouteData{
-		Host: p.job.BackendHost,
-		Port: p.job.BackendPort,
+		Host:       p.job.BackendHost,
+		Port:       p.job.BackendPort,
+		TLSPort:    p.job.BackendTLSPort,
+		InstanceId: p.job.BackendInstanceId,
 	}
 
 	for i := p.job.StartRange; i < p.job.EndRange; i += 1 {

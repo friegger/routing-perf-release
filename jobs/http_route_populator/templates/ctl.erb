@@ -16,6 +16,12 @@ case $1 in
       -nats <%= p("http_route_populator.nats") %> \
       -backendHost <%= link("static").instances[0].address %> \
       -backendPort 8080 \
+      <% if_p("http_route_populator.backend_tls_port") do |port| %> \
+      -backendTLSPort <%= port.to_s %> \
+      <% end %> \
+      <% if_p("http_route_populator.backend_instance_id") do |instance_id| %> \
+      -backendInstanceId <%= instance_id %> \
+      <% end %> \
       -appDomain <%= p("http_route_populator.app_domain") %> \
       -appName <%= p("http_route_populator.app_name") %> \
       -numRoutes <%= p("http_route_populator.num_routes") %> \

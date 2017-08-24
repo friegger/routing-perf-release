@@ -1,0 +1,20 @@
+---
+name: gostatictls
+templates:
+  ctl.erb: bin/ctl
+
+packages:
+  - gostatictls
+
+provides:
+  - name: static
+    type: backend
+
+properties:
+  gostatictls.response_size:
+    description: "Size of the response returned when making a request on gostatictls."
+    default: 1
+  gostatictls.app_cert:
+    description: "Certificate for gostatictls"
+  gostatictls.app_key:
+    description: "Private key for TLS termination"

@@ -1,0 +1,6 @@
+---
+name: gostatictls
+dependencies:
+- golang
+files:
+  - gostatictls/**/*.go
