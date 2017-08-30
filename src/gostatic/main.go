@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/valyala/fasthttp"
 )
@@ -30,5 +31,19 @@ func main() {
 }
 
 func index(ctx *fasthttp.RequestCtx) {
+	switch string(ctx.Path()) {
+	case "/slow":
+		slowHandler(ctx)
+	default:
+		defaultHandler(ctx)
+	}
+}
+
+func slowHandler(ctx *fasthttp.RequestCtx) {
+	time.Sleep(5 * time.Second)
+	fmt.Fprintf(ctx, data)
+}
+
+func defaultHandler(ctx *fasthttp.RequestCtx) {
 	fmt.Fprintf(ctx, data)
 }
