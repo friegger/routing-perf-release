@@ -5,18 +5,11 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
-
-	"throughputramp/data"
-	"throughputramp/uploader"
 )
 
 var (
@@ -27,13 +20,13 @@ var (
 	lowerConcurrency = flag.Int("lower-concurrency", 1, "Starting concurrency value")
 	upperConcurrency = flag.Int("upper-concurrency", 30, "Ending concurrency value")
 	concurrencyStep  = flag.Int("concurrency-step", 1, "Concurrency increase per run")
-	s3Endpoint       = flag.String("s3-endpoint", "", "The endpoint for the S3 service to which plots will be uploaded.")
-	s3Region         = flag.String("s3-region", "", "The region for the S3 service to which plots will be uploaded. If provided, endpoint is ignored.")
-	bucketName       = flag.String("bucket-name", "", "Name of the bucket to which plots will be uploaded.")
-	accessKeyID      = flag.String("access-key-id", "", "AccessKeyID for the S3 service.")
-	secretAccessKey  = flag.String("secret-access-key", "", "SecretAccessKey for the S3 service.")
-	cpuMonitorURL    = flag.String("cpumonitor-url", "", "Endpoint for monitoring CPU metrics")
-	localCSV         = flag.String("local-csv", "", "Stores csv locally to a specified directory when the flag is set")
+	//	s3Endpoint       = flag.String("s3-endpoint", "", "The endpoint for the S3 service to which plots will be uploaded.")
+	//	s3Region         = flag.String("s3-region", "", "The region for the S3 service to which plots will be uploaded. If provided, endpoint is ignored.")
+	//	bucketName       = flag.String("bucket-name", "", "Name of the bucket to which plots will be uploaded.")
+	accessKeyID     = flag.String("access-key-id", "", "AccessKeyID for the S3 service.")
+	secretAccessKey = flag.String("secret-access-key", "", "SecretAccessKey for the S3 service.")
+	//cpuMonitorURL   = flag.String("cpumonitor-url", "", "Endpoint for monitoring CPU metrics")
+	localCSV = flag.String("local-csv", "", "Stores csv locally to a specified directory when the flag is set")
 )
 
 func main() {
@@ -42,57 +35,55 @@ func main() {
 		usageAndExit()
 	}
 
-	s3Config := &uploader.Config{
-		Endpoint:        *s3Endpoint,
-		AwsRegion:       *s3Region,
-		BucketName:      *bucketName,
-		AccessKeyID:     *accessKeyID,
-		SecretAccessKey: *secretAccessKey,
-	}
-	err := s3Config.Validate()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "s3 config error: %s\n", err)
-		usageAndExit()
-	}
+	//	s3Config := &uploader.Config{
+	//		Endpoint:        *s3Endpoint,
+	//		AwsRegion:       *s3Region,
+	//		BucketName:      *bucketName,
+	//		AccessKeyID:     *accessKeyID,
+	//		SecretAccessKey: *secretAccessKey,
+	//	}
+	//	err := s3Config.Validate()
+	//	if err != nil {
+	//		fmt.Fprintf(os.Stderr, "s3 config error: %s\n", err)
+	//		usageAndExit()
+	//	}
 
 	router := flag.Args()[0]
 
-	cpumonitorURL := strings.TrimPrefix(*cpuMonitorURL, "http://")
+	//cpumonitorURL := strings.TrimPrefix(*cpuMonitorURL, "http://")
 
 	runBenchmark(router,
 		*host,
-		cpumonitorURL,
 		*numRequests,
 		*lowerConcurrency,
 		*upperConcurrency,
 		*concurrencyStep,
-		*threadRateLimit,
-		s3Config)
+		*threadRateLimit)
 
 }
 
-func uploadCSV(s3config *uploader.Config, csvData io.Reader, cpuCsv []byte) {
-	timeString := time.Now().UTC().Format(time.RFC3339)
-	csvDataFile := timeString + ".csv"
-	var cpuFilename string
-
-	loc, err := uploader.Upload(s3config, csvData, csvDataFile)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "uploading to s3 error: %s\n", err)
-		os.Exit(1)
-	}
-	fmt.Fprintf(os.Stdout, "csv uploaded to %s\n", loc)
-
-	if len(cpuCsv) != 0 {
-		cpuFilename = fmt.Sprintf("cpuStats-%s.csv", timeString)
-
-		loc, err := uploader.Upload(s3config, bytes.NewBuffer(cpuCsv), cpuFilename)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "uploading to s3 error: %s\n", err)
-		}
-		fmt.Fprintf(os.Stdout, "cpu csv uploaded to %s\n", loc)
-	}
-}
+// func uploadCSV(s3config *uploader.Config, csvData io.Reader, cpuCsv []byte) {
+// 	timeString := time.Now().UTC().Format(time.RFC3339)
+// 	csvDataFile := timeString + ".csv"
+// 	var cpuFilename string
+//
+// 	loc, err := uploader.Upload(s3config, csvData, csvDataFile)
+// 	if err != nil {
+// 		fmt.Fprintf(os.Stderr, "uploading to s3 error: %s\n", err)
+// 		os.Exit(1)
+// 	}
+// 	fmt.Fprintf(os.Stdout, "csv uploaded to %s\n", loc)
+//
+// 	if len(cpuCsv) != 0 {
+// 		cpuFilename = fmt.Sprintf("cpuStats-%s.csv", timeString)
+//
+// 		loc, err := uploader.Upload(s3config, bytes.NewBuffer(cpuCsv), cpuFilename)
+// 		if err != nil {
+// 			fmt.Fprintf(os.Stderr, "uploading to s3 error: %s\n", err)
+// 		}
+// 		fmt.Fprintf(os.Stdout, "cpu csv uploaded to %s\n", loc)
+// 	}
+// }
 
 func writeFile(path string, data []byte) {
 	f, err := os.Create(path)
@@ -109,25 +100,23 @@ func writeFile(path string, data []byte) {
 }
 
 func runBenchmark(router,
-	host,
-	cpumonitorURL string,
+	host string,
 	numRequests,
 	lowerConcurrency,
 	upperConcurrency,
 	concurrencyStep,
-	threshold int,
-	uploaderConfig *uploader.Config) {
+	threshold int) {
 
-	if cpumonitorURL != "" {
-		_, err := stopCPUMonitor(cpumonitorURL)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Ignoring err in stopping CPU Monitor: %s\n", err)
-		}
-		if err = startCPUMonitor(cpumonitorURL); err != nil {
-			fmt.Fprintf(os.Stderr, "%s\n", err)
-			os.Exit(1)
-		}
-	}
+	//if cpumonitorURL != "" {
+	//	_, err := stopCPUMonitor(cpumonitorURL)
+	//	if err != nil {
+	//		fmt.Fprintf(os.Stderr, "Ignoring err in stopping CPU Monitor: %s\n", err)
+	//	}
+	//	if err = startCPUMonitor(cpumonitorURL); err != nil {
+	//		fmt.Fprintf(os.Stderr, "%s\n", err)
+	//		os.Exit(1)
+	//	}
+	//}
 
 	benchmarkData := new(bytes.Buffer)
 	for i := lowerConcurrency; i <= upperConcurrency; i += concurrencyStep {
@@ -144,26 +133,26 @@ func runBenchmark(router,
 		}
 	}
 
-	var cpuCsv []byte
-	if cpumonitorURL != "" {
-		var err error
-		cpuCsv, err = stopCPUMonitor(cpumonitorURL)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s\n", err)
-			os.Exit(1)
-		}
-	}
+	//var cpuCsv []byte
+	//if cpumonitorURL != "" {
+	//	var err error
+	//	cpuCsv, err = stopCPUMonitor(cpumonitorURL)
+	//	if err != nil {
+	//		fmt.Fprintf(os.Stderr, "%s\n", err)
+	//		os.Exit(1)
+	//	}
+	//}
 
 	if *localCSV != "" {
 		perfResult := filepath.Join(*localCSV, "perfResults.csv")
 		writeFile(perfResult, benchmarkData.Bytes())
 
-		if len(cpuCsv) != 0 {
-			cpuResult := filepath.Join(*localCSV, "cpuStats.csv")
-			writeFile(cpuResult, cpuCsv)
-		}
+		//if len(cpuCsv) != 0 {
+		//	cpuResult := filepath.Join(*localCSV, "cpuStats.csv")
+		//	writeFile(cpuResult, cpuCsv)
+		//}
 	}
-	uploadCSV(uploaderConfig, benchmarkData, cpuCsv)
+	//uploadCSV(uploaderConfig, benchmarkData, cpuCsv)
 }
 
 func run(router, host string, numRequests, concurrentRequests, rateLimit int) ([]byte, error) {
@@ -177,7 +166,7 @@ func run(router, host string, numRequests, concurrentRequests, rateLimit int) ([
 		router,
 	}
 
-	heyData, err := exec.Command("hey", args...).Output()
+	heyData, err := exec.Command("/Users/cpi/workspace/routing-perf-release/src/github.com/rakyll/hey/hey", args...).Output()
 	if err != nil {
 		return nil, fmt.Errorf("hey error: %s\nData:\n%s", err, string(heyData))
 	}
@@ -215,36 +204,36 @@ func usageAndExit() {
 	os.Exit(1)
 }
 
-func startCPUMonitor(url string) error {
-	startURL := fmt.Sprintf("http://%s/start", url)
-	resp, err := http.Get(startURL)
-	if err != nil {
-		return fmt.Errorf("calling cpumonitor stop %s", err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("received resp %d", resp.StatusCode)
-	}
-
-	return nil
-}
-
-func stopCPUMonitor(url string) ([]byte, error) {
-	startURL := fmt.Sprintf("http://%s/stop", url)
-	resp, err := http.Get(startURL)
-	if err != nil {
-		return nil, fmt.Errorf("calling cpumonitor stop %s", err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("received resp %d", resp.StatusCode)
-	}
-
-	rawData, err := ioutil.ReadAll(resp.Body)
-	defer resp.Body.Close()
-
-	csvData, err := data.GenerateCpuCSV(rawData)
-	if err != nil {
-		return nil, fmt.Errorf("GeneratateCpuCSV %d", resp.StatusCode)
-	}
-
-	return csvData, nil
-}
+//func startCPUMonitor(url string) error {
+//	startURL := fmt.Sprintf("http://%s/start", url)
+//	resp, err := http.Get(startURL)
+//	if err != nil {
+//		return fmt.Errorf("calling cpumonitor stop %s", err)
+//	}
+//	if resp.StatusCode != http.StatusOK {
+//		return fmt.Errorf("received resp %d", resp.StatusCode)
+//	}
+//
+//	return nil
+//}
+//
+//func stopCPUMonitor(url string) ([]byte, error) {
+//	startURL := fmt.Sprintf("http://%s/stop", url)
+//	resp, err := http.Get(startURL)
+//	if err != nil {
+//		return nil, fmt.Errorf("calling cpumonitor stop %s", err)
+//	}
+//	if resp.StatusCode != http.StatusOK {
+//		return nil, fmt.Errorf("received resp %d", resp.StatusCode)
+//	}
+//
+//	rawData, err := ioutil.ReadAll(resp.Body)
+//	defer resp.Body.Close()
+//
+//	csvData, err := data.GenerateCpuCSV(rawData)
+//	if err != nil {
+//		return nil, fmt.Errorf("GeneratateCpuCSV %d", resp.StatusCode)
+//	}
+//
+//	return csvData, nil
+//}
